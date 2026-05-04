@@ -1,0 +1,83 @@
+customers[icon: person]{
+  id serial pk
+  customer_name varchar(100) not null
+  phone_number varchar(25)
+  username varchar(25) 
+  email varchar(120)
+
+  created_at timestamp
+  updated_at timestamp
+}
+
+delivery_addresses[icon: map-pin]{
+  id serial pk
+  customer_id int fk
+
+  country varchar(70) 
+  state varchar(100)
+  city varchar(100)
+  pincode varchar(10)
+  landmark text
+}
+
+products[icon: menu]{
+  id serial pk
+  product_name varchar(100) not null 
+  category varchar(25)
+  description text
+}
+
+product_variants[icon: variable]{
+  id serial pk
+  product_id int fk
+  size int 
+  color varchar(25)
+  condition varchar(15)
+  is_thrifted boolean
+  quantity int
+  price int
+  UNIQUE(product_id, size, color)
+}
+
+orders[icon: shopping-bag]{
+  id serial pk
+  customer_id int fk
+  address_id int fk
+  created_at timestamp
+  updated_at timestamp
+  total_amount int
+  order_status varchar(15) CHECK(order_status IN ('PLACED','SHIPPED','OUT_FOR_DELIVERY','DELIVERED','CANCELLED'))
+}
+
+order_items[icon: shopping-cart]{
+  id serial pk
+  order_id int fk
+  product_variants_id int fk
+  quantity int
+  purchase_price int 
+}
+
+payments[icon: payment]{
+  id serial pk
+  order_id int fk
+  transaction_id varchar(100) UNIQUE // Razorpay / Stripe / UPI tracking
+  amount int CHECK(amount >= 0)
+  payment_mode varchar(15) CHECK( payment_mode in ('DEBIT CARD','CREDIT CARD','UPI','WALLET','COD'))
+  payment_status varchar(15) CHECK(payment_status in ('SUCCESS','FAILED','PENDING'))
+  payment_date timestamp
+  created_at timestamp
+}
+
+
+customers.id < orders.customer_id
+orders.id < order_items.order_id
+product_variants.id < order_items.product_variants_id
+products.id < product_variants.product_id
+customers.id < delivery_addresses.customer_id
+delivery_addresses.id < orders.address_id
+orders.id < payments.order_id
+
+
+
+
+
